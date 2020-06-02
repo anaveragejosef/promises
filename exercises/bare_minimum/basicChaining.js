@@ -12,35 +12,27 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var promiseConstructor = require('./promiseConstructor');
 var promisification = require('./promisification');
+var writeFileAsync = Promise.promisify(fs.writeFile);
+
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
   // Use pluckFirstLine function and pass in readFilePath
   return promiseConstructor.pluckFirstLineFromFileAsync(readFilePath)
-    /* .then((userName) => {
-      // Check for errors
-      if (!userName) {
-        throw new Error ('No username available');
-      } else {
-        return userName;
-        //return promisification.getGitHubProfileAsync(userName);
-      }
-    }) */
     // Use .then to pass in gitHubProfile function
     .then((userName) => {
-      console.log('userName: ', userName);
+      // console.log('userName: ', userName); // danthareja
+
       return promisification.getGitHubProfileAsync(userName);
     })
     // Use .then to write the response to a file
     .then((profileData) => {
-      console.log('Profile Data ', profileData); // object
-      console.log('JSON strigify : ', JSON.stringify(profileData)); // json
+      // console.log('Profile Data ', profileData); // object
+      // console.log('JSON strigify : ', JSON.stringify(profileData)); // json.stringified
+      // var stringProf = JSON.stringify(profileData);
+      // console.log('Type', typeof stringProf); // string
+
       // Return JSON response
-      // return fs.writeFile(writeFilePath, JSON.stringify(profileData));
-      return fs.writeFile(writeFilePath, JSON.stringify(profileData), 'utf8', (err) => {
-        if (err) {
-          throw new Error ('Cannot write to file: ', err);
-        }
-      });
+      return writeFileAsync(writeFilePath, JSON.stringify(profileData), 'utf8');
     })
     .catch((err) => {
       console.log('Error while running function: ', err);
